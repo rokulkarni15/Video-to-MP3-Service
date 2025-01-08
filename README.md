@@ -86,13 +86,13 @@ docker-compose up --build
 
 ## API Endpoints
 ### Auth Service
-POST /api/v1/register - Register new user
-POST /api/v1/token - Login and get token
+- POST /api/v1/register - Register new user
+- POST /api/v1/token - Login and get token
 
 ### Gateway Service
-POST /api/v1/convert - Upload video for conversion
-GET /api/v1/status/{job_id} - Check conversion status
-GET /api/v1/download/{job_id} - Download converted MP3
+- POST /api/v1/convert - Upload video for conversion
+- GET /api/v1/status/{job_id} - Check conversion status
+- GET /api/v1/download/{job_id} - Download converted MP3
 
 ## Usage Example
 1. Register a user
