@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: auth_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  mongodb:
+    image: mongo:latest
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "27017:27017"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  auth:
+    build:
+      context: .
+      dockerfile: deploy/docker/auth/Dockerfile
+    depends_on:
+      - mysql
+    environment:
+      - DATABASE_URL=mysql+pymysql://user:password@mysql/auth_db
+    ports:
+      - "8001:8001"
+
+  gateway:
+    build:
+      context: .
+      dockerfile: deploy/docker/gateway/Dockerfile
+    depends_on:
+      - auth
+      - rabbitmq
+    environment:
+      - AUTH_SERVICE_URL=http://auth:8001
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - MONGODB_URL=mongodb://mongodb:27017
+    ports:
+      - "8000:8000"
+    volumes:
+      - upload_data:/tmp/uploads
+      - converted_data:/tmp/converted
+
+  converter:
+    build:
+      context: .
+      dockerfile: deploy/docker/converter/Dockerfile
+    depends_on:
+      - rabbitmq
+      - mongodb
+    environment:
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - MONGODB_URL=mongodb://mongodb:27017
+    volumes:
+      - upload_data:/tmp/uploads
+      - converted_data:/tmp/converted
+
+  notification:
+    build:
+      context: .
+      dockerfile: deploy/docker/notification/Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq
+      - mongodb
+    
+
+
+volumes:
+  mysql_data:
+  mongodb_data:
+  upload_data:
+  converted_data:
