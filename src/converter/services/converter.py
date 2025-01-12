@@ -12,7 +12,6 @@ logger = logging.getLogger(__name__)
 
 class ConverterService:
     def __init__(self):
-        # Create directories if they don't exist
         os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
         os.makedirs(settings.OUTPUT_DIR, exist_ok=True)
         
@@ -37,7 +36,7 @@ class ConverterService:
             # Update job status in database
             await self.update_job_status(job_id, "processing")
             
-            # Validate input file - Note the await here
+            # Validate input file
             logger.info(f"Validating file for job {job_id}")
             is_valid, error = await ffmpeg.validate_file(file_path)
             if not is_valid:

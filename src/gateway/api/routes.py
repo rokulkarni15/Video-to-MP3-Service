@@ -40,9 +40,6 @@ async def convert_video(
             user_email=user_data["email"]
         )
         
-        # Remove this line - let the converter service handle cleanup
-        # background_tasks.add_task(file_handler.cleanup_file, file_path)
-        
         return JSONResponse(
             status_code=202,
             content={
